@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Lesson 4: Amazing Wolves! 🐺</title>
+<style>
+  :root{
+    --forest-deep:#5b3a9e;
+    --forest-mid:#8b5cf6;
+    --moon-cream:#fef9f0;
+    --moon-gold:#ffb703;
+    --berry:#ff5d8f;
+    --sky:#2ec4f1;
+    --ink:#33245e;
+    --card:#ffffff;
+    --paw:#ff8c42;
+    --star:#ffd23f;
+    --success:#06d6a0;
+    --radius-lg:26px;
+    --radius-md:18px;
+    --radius-sm:12px;
+    --touch-min:56px;
+  }
+
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  button, [role="button"], input[type="checkbox"], .chip, .opinion-item, .predict-item, .vocab-tile, .nav-btn, .listen-all-btn, .check-btn, .reset-btn, .sentence{
+    touch-action: manipulation;
+  }
+
+  html{
+    height:100%;
+    overflow:hidden;
+  }
+
+  body{
+    margin:0; padding:0;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    background: var(--moon-cream);
+    font-family: 'Baloo 2','Comic Sans MS','Trebuchet MS',sans-serif;
+    color: var(--ink);
+    overflow:hidden;
+    overscroll-behavior-y: contain;
+    background-image:
+      radial-gradient(circle at 10% 8%, rgba(139,92,246,0.16) 0, transparent 40%),
+      radial-gradient(circle at 90% 15%, rgba(255,183,3,0.20) 0, transparent 35%),
+      radial-gradient(circle at 85% 85%, rgba(46,196,241,0.18) 0, transparent 40%),
+      radial-gradient(circle at 15% 90%, rgba(255,93,143,0.14) 0, transparent 38%);
+  }
+
+  /* #app is the ONE scrollable content region. Everything (header, nav,
+     panels, bottom-nav) lives inside it and scrolls together, so the
+     bottom action buttons are never lost behind an Android smartboard's
+     system/navigation bar. */
+  #app{
+    flex:1 1 auto;
+    min-height:0;
+    max-width: 900px;
+    width:100%;
+    margin: 0 auto;
+    padding: 14px 14px 10px;
+    overflow-y: scroll;
+    overscroll-behavior-y: contain;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: max(120px, env(safe-area-inset-bottom) + 100px);
+  }
+
+  /* ===== HEADER ===== */
+  header.lesson-head{
+    background: linear-gradient(135deg, var(--forest-deep) 0%, var(--forest-mid) 45%, var(--sky) 100%);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    color: #ffffff;
+    position: relative;
+    overflow:hidden;
+    box-shadow: 0 8px 0 rgba(91,58,158,0.3);
+    margin-bottom:16px;
+  }
+  header.lesson-head::after{
+    content:"🌙";
+    position:absolute;
+    right:16px; top:10px;
+    font-size:36px;
+    opacity:0.7;
+    animation: gentle-float 3.2s ease-in-out infinite;
+  }
+  header.lesson-head::before{
+    content:"✨";
+    position:absolute;
+    right:64px; top:44px;
+    font-size:20px;
+    opacity:0.75;
+    animation: gentle-float 2.6s ease-in-out infinite reverse;
+  }
+  @keyframes gentle-float{
+    0%,100%{ transform: translateY(0) rotate(0deg); }
+    50%{ transform: translateY(-6px) rotate(8deg); }
+  }
+  header.lesson-head h1{
+    margin:0 0 4px;
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight:800;
+    letter-spacing:0.3px;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.12);
+  }
+  header.lesson-head p{
+    margin:0;
+    font-size: clamp(14px, 3vw, 17px);
+    opacity:0.96;
+    font-weight:600;
+  }
+  .paw-trail{
+    font-size:16px;
+    letter-spacing:10px;
+    margin-top:8px;
+    opacity:0.8;
+  }
+
+  /* ===== PROGRESS NAV ===== */
+  nav.progress-nav{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .nav-btn{
+    flex:1 1 auto;
+    min-width: 66px;
+    min-height: var(--touch-min);
+    border-radius: var(--radius-md);
+    border:3px solid var(--forest-mid);
+    background: var(--card);
+    color: var(--forest-deep);
+    font-weight:800;
+    font-size:15px;
+    font-family:inherit;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+    transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+    padding:6px 4px;
+    box-shadow: 0 4px 0 rgba(139,92,246,0.18);
+  }
+  .nav-btn .emoji{font-size:22px;}
+  .nav-btn[data-panel="vocab"]{ border-color: var(--forest-mid); }
+  .nav-btn[data-panel="activity1"]{ border-color: var(--sky); }
+  .nav-btn[data-panel="activity2"]{ border-color: var(--berry); }
+  .nav-btn[data-panel="activity3"]{ border-color: var(--paw); }
+  .nav-btn[data-panel="activity4"]{ border-color: var(--star); }
+  .nav-btn.active{
+    background: var(--moon-gold);
+    border-color: var(--moon-gold);
+    color: var(--ink);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 6px 0 rgba(255,140,66,0.35);
+  }
+  .nav-btn .star-check{
+    font-size:13px;
+    color: var(--success);
+  }
+  .nav-btn:active{ transform: scale(0.96); }
+
+  /* ===== SECTIONS ===== */
+  section.panel{
+    display:none;
+    animation: fadeIn .35s ease;
+  }
+  section.panel.active{ display:block; }
+  @keyframes fadeIn{
+    from{opacity:0; transform:translateY(8px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .card{
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    margin-bottom:16px;
+    box-shadow: 0 6px 18px rgba(139,92,246,0.14);
+    border: 3px solid rgba(139,92,246,0.18);
+  }
+
+  .instruction{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background: linear-gradient(120deg, var(--sky), #4dd8f7);
+    color:#fff;
+    padding:12px 16px;
+    border-radius: var(--radius-md);
+    font-weight:700;
+    font-size: clamp(14px, 3vw, 17px);
+    margin-bottom:14px;
+    box-shadow: 0 4px 0 rgba(20,140,180,0.35);
+  }
+  .instruction .icon{font-size:22px; flex-shrink:0;}
+
+  .listen-all-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background: linear-gradient(120deg, var(--berry), #ff8fb3);
+    color:#fff;
+    border:none;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-weight:800;
+    font-size:15px;
+    font-family:inherit;
+    min-height: var(--touch-min);
+    cursor:pointer;
+    box-shadow: 0 4px 0 rgba(200,50,110,0.4);
+    margin-bottom:14px;
+  }
+  .listen-all-btn:active{ transform: translateY(2px); box-shadow:none; }
+
+  /* ===== VOCAB BANNER (numbers) ===== */
+  .vocab-banner{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap:10px;
+  }
+  .vocab-tile{
+    position:relative;
+    min-height: 90px;
+    border-radius: var(--radius-md);
+    border:none;
+    cursor:pointer;
+    font-family:inherit;
+    background: linear-gradient(160deg, #fff, #fff3d6);
+    border:3px solid var(--moon-gold);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding:8px;
+    transition: transform .18s;
+    perspective: 600px;
+    box-shadow: 0 4px 0 rgba(255,183,3,0.25);
+  }
+  .vocab-tile:active{ transform: scale(0.95); }
+  .vocab-tile .num{
+    font-size: 30px;
+    font-weight:800;
+    color: var(--forest-deep);
+  }
+  .vocab-tile .word{
+    font-size: 15px;
+    font-weight:700;
+    color: var(--berry);
+    text-transform:capitalize;
+    min-height:19px;
+  }
+  .vocab-tile .speak-hint{
+    font-size:11px;
+    color: var(--paw);
+    opacity:0.8;
+    font-weight:600;
+  }
+  .vocab-tile.revealed{
+    background: linear-gradient(160deg,#e3fbf3,#c8f7e5);
+    border-color: var(--success);
+    box-shadow: 0 4px 0 rgba(6,214,160,0.3);
+  }
+  .vocab-tile.speaking{
+    box-shadow: 0 0 0 4px rgba(46,196,241,0.5);
+    transform: scale(1.04);
+  }
+
+  /* ===== WOLF FACT TEXT ===== */
+  .story-text{
+    font-size: clamp(16px, 3.6vw, 19px);
+    line-height:1.85;
+    background: linear-gradient(160deg, var(--moon-cream), #fff2da);
+    border-radius: var(--radius-md);
+    padding:16px;
+  }
+  .story-text .sentence{
+    display:inline;
+    cursor:pointer;
+    border-radius:6px;
+    padding:1px 3px;
+    transition: background .15s;
+  }
+  .story-text .sentence:hover, .story-text .sentence.speaking{
+    background: rgba(46,196,241,0.3);
+  }
+  .story-text .hot-word{
+    font-weight:800;
+    color: var(--berry);
+    border-bottom: 3px dotted var(--moon-gold);
+  }
+
+  .photo-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+    margin-top:14px;
+  }
+  @media (max-width:480px){
+    .photo-row{grid-template-columns:1fr;}
+  }
+  .photo-card{
+    background: linear-gradient(160deg,#fff,#ffe9d6);
+    border-radius: var(--radius-md);
+    padding:12px;
+    border:3px solid var(--paw);
+    text-align:center;
+    box-shadow: 0 4px 0 rgba(255,140,66,0.22);
+  }
+  .photo-card .art{
+    font-size:48px;
+    margin-bottom:6px;
+  }
+  .photo-card p{
+    margin:0;
+    font-size:14px;
+    line-height:1.5;
+    cursor:pointer;
+  }
+  .photo-card p:active{ opacity:0.6; }
+
+  .predict-box{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:10px;
+    margin-top:12px;
+  }
+  @media (max-width:480px){ .predict-box{grid-template-columns:1fr;} }
+  .predict-item{
+    background:#fff;
+    border:3px dashed var(--forest-mid);
+    border-radius: var(--radius-md);
+    padding:12px;
+    min-height: var(--touch-min);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .predict-item:has(input:checked){
+    background: #e3fbf3;
+    border-color: var(--success);
+    border-style: solid;
+  }
+  .predict-item input[type=checkbox]{
+    width:28px; height:28px;
+    min-width:28px; min-height:28px;
+    accent-color: var(--success);
+    flex-shrink:0;
+  }
+
+  /* ===== ACTIVITY 2 FACTS ===== */
+  .facts-grid{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .fact-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    background: linear-gradient(160deg, var(--moon-cream), #fdf0da);
+    border-radius: var(--radius-sm);
+    padding:10px 12px;
+  }
+  .fact-label{
+    font-weight:700;
+    font-size:15px;
+    color: var(--forest-deep);
+    min-width:150px;
+    flex-shrink:0;
+  }
+  .fact-blank{
+    flex:1 1 100px;
+    min-width:90px;
+    min-height:48px;
+    border:3px solid var(--moon-gold);
+    border-radius: var(--radius-sm);
+    font-size:16px;
+    font-weight:700;
+    font-family:inherit;
+    text-align:center;
+    padding:6px 8px;
+    background:#fff;
+    color: var(--ink);
+  }
+  .fact-blank:focus{
+    outline:none;
+    border-color: var(--berry);
+    background: #fffdf5;
+  }
+  .fact-blank.correct{
+    background: #e3fbf3;
+    border-color: var(--success);
+    color: var(--success);
+  }
+  .fact-static{
+    font-weight:700;
+    font-size:16px;
+    color: var(--paw);
+  }
+
+  .check-btn, .reset-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    min-height: var(--touch-min);
+    border:none;
+    border-radius: 999px;
+    font-weight:800;
+    font-size:16px;
+    font-family:inherit;
+    padding:12px 24px;
+    cursor:pointer;
+    margin-top:14px;
+    margin-right:10px;
+  }
+  .check-btn{
+    background: linear-gradient(120deg, var(--success), #33e6b8);
+    color:#fff;
+    box-shadow: 0 4px 0 rgba(4,170,128,0.4);
+  }
+  .reset-btn{
+    background:#fff;
+    color: var(--forest-deep);
+    border:3px solid var(--forest-mid);
+  }
+  .check-btn:active, .reset-btn:active{ transform: translateY(2px); }
+
+  #facts-feedback{
+    margin-top:12px;
+    font-weight:800;
+    font-size:16px;
+    min-height:24px;
+  }
+
+  /* ===== ACTIVITY 3 (pair talk) ===== */
+  .talk-card{
+    background: linear-gradient(160deg, #fff8ea, #ffedd6);
+    border-radius: var(--radius-md);
+    padding:20px;
+    text-align:center;
+  }
+  .talk-card .big-icon{ font-size:52px; }
+  .prompt-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-top:14px;
+  }
+  .chip{
+    background: var(--sky);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:10px 16px;
+    font-weight:700;
+    font-size:14px;
+    font-family:inherit;
+    min-height:48px;
+    min-width:48px;
+    cursor:pointer;
+    box-shadow: 0 3px 0 rgba(20,140,180,0.35);
+  }
+  .chip:nth-child(2n){ background: var(--berry); box-shadow: 0 3px 0 rgba(200,50,110,0.35); }
+  .chip:nth-child(3n){ background: var(--forest-mid); box-shadow: 0 3px 0 rgba(91,58,158,0.35); }
+  .chip:active{ transform: translateY(2px) scale(0.97); box-shadow:none; }
+
+  /* ===== ACTIVITY 4 (opinions) ===== */
+  .opinion-list{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .opinion-item{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background: linear-gradient(160deg, var(--moon-cream), #fdf0da);
+    border:3px solid transparent;
+    border-radius: var(--radius-md);
+    padding:14px 16px;
+    cursor:pointer;
+    min-height: var(--touch-min);
+    transition: border-color .15s, background .15s, transform .15s;
+  }
+  .opinion-item.checked{
+    border-color: var(--success);
+    background: #e3fbf3;
+    transform: scale(1.02);
+  }
+  .opinion-item .tickbox{
+    width:36px; height:36px;
+    border-radius:10px;
+    border:3px solid var(--forest-mid);
+    background:#fff;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    color: var(--success);
+    font-weight:900;
+  }
+  .opinion-item .opinion-text{
+    font-size: clamp(16px,3.6vw,19px);
+    font-weight:700;
+    flex:1;
+  }
+  .opinion-item .opinion-emoji{ font-size:28px; }
+
+  .bottom-nav{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:6px;
+  }
+  .bottom-nav button{
+    flex:1;
+    min-height: var(--touch-min);
+    border-radius: var(--radius-md);
+    border:none;
+    font-weight:800;
+    font-size:16px;
+    font-family:inherit;
+    cursor:pointer;
+    background: linear-gradient(120deg, var(--forest-deep), var(--forest-mid));
+    color:#fff;
+    box-shadow: 0 4px 0 rgba(91,58,158,0.4);
+  }
+  .bottom-nav button:disabled{
+    opacity:0.35;
+    box-shadow:none;
+  }
+  .bottom-nav button:active:not(:disabled){ transform: translateY(2px); box-shadow:none; }
+
+  .sr-caption{
+    text-align:center;
+    font-size:12px;
+    color: var(--paw);
+    margin-top:6px;
+    opacity:0.8;
+  }
+
+  ::selection{ background: var(--moon-gold); }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <header class="lesson-head">
+    <h1>Lesson 4: Amazing Wolves! 🐺</h1>
+    <p>Numbers 20–100 and reading about wolves</p>
+    <div class="paw-trail">🐾 🐾 🐾 🐾 🐾</div>
+  </header>
+
+  <nav class="progress-nav" id="progressNav">
+    <button class="nav-btn active" data-panel="vocab"><span class="emoji">🔢</span>Numbers</button>
+    <button class="nav-btn" data-panel="activity1"><span class="emoji">🔎</span>Look</button>
+    <button class="nav-btn" data-panel="activity2"><span class="emoji">✏️</span>Facts</button>
+    <button class="nav-btn" data-panel="activity3"><span class="emoji">💬</span>Talk</button>
+    <button class="nav-btn" data-panel="activity4"><span class="emoji">⭐</span>Think</button>
+  </nav>
+
+  <!-- ===================== VOCAB PANEL ===================== -->
+  <section class="panel active" id="panel-vocab">
+    <div class="card">
+      <div class="instruction"><span class="icon">👉</span> Tap a number. Look, listen, and say it!</div>
+      <button class="listen-all-btn" id="listenAllNumbers">🔊 Listen to all numbers</button>
+      <div class="vocab-banner" id="vocabBanner"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ACTIVITY 1 ===================== -->
+  <section class="panel" id="panel-activity1">
+    <div class="card">
+      <div class="instruction"><span class="icon">🔎</span> Look at the photos. Think of two things you know about wolves!</div>
+
+      <div class="predict-box" id="predictBox">
+        <label class="predict-item"><input type="checkbox"> Wolves live in forests</label>
+        <label class="predict-item"><input type="checkbox"> Wolves say "Awoooo!"</label>
+        <label class="predict-item"><input type="checkbox"> Wolves live in groups</label>
+        <label class="predict-item"><input type="checkbox"> Wolves have sharp teeth</label>
+      </div>
+
+      <div class="photo-row">
+        <div class="photo-card" id="cubPhoto">
+          <div class="art">🐺🐾</div>
+          <p>Look! These are baby wolves. They're called <b>"cubs"</b>. This mother's got four cubs.</p>
+        </div>
+        <div class="photo-card" id="packPhoto">
+          <div class="art">🐺🐺🐺</div>
+          <p>A wolf family is called a <b>"pack"</b>. There are four to nine wolves in a pack. Wolves eat birds and fish.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="instruction"><span class="icon">📖</span> Read and check your ideas!</div>
+      <button class="listen-all-btn" id="listenStory">🔊 Read the whole story</button>
+      <div class="story-text" id="storyText"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ACTIVITY 2 ===================== -->
+  <section class="panel" id="panel-activity2">
+    <div class="card">
+      <div class="instruction"><span class="icon">✏️</span> Read again. Complete the wolf facts. Be a star!</div>
+
+      <div class="facts-grid" id="factsGrid"></div>
+
+      <button class="check-btn" id="checkFacts">✅ Check my answers</button>
+      <button class="reset-btn" id="resetFacts">🔄 Try again</button>
+      <div id="facts-feedback"></div>
+    </div>
+  </section>
+
+  <!-- ===================== ACTIVITY 3 ===================== -->
+  <section class="panel" id="panel-activity3">
+    <div class="card">
+      <div class="instruction"><span class="icon">💬</span> Work in pairs. What can you remember about wolves?</div>
+      <div class="talk-card">
+        <div class="big-icon">🗣️👫</div>
+        <p style="font-size:17px; font-weight:700; margin:10px 0 4px;">Tell your partner! Tap a card for an idea.</p>
+        <div class="prompt-chips" id="promptChips">
+          <button class="chip">What colour are wolves?</button>
+          <button class="chip">How many teeth?</button>
+          <button class="chip">How fast can they run?</button>
+          <button class="chip">What is a "pack"?</button>
+          <button class="chip">What is a "cub"?</button>
+          <button class="chip">What do wolves eat?</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ACTIVITY 4 ===================== -->
+  <section class="panel" id="panel-activity4">
+    <div class="card">
+      <div class="instruction"><span class="icon">⭐</span> What do you think about wolves? Choose and tick!</div>
+      <div class="opinion-list" id="opinionList">
+        <div class="opinion-item" data-opinion="scary">
+          <div class="tickbox"></div>
+          <span class="opinion-emoji">😨</span>
+          <span class="opinion-text">They're scary.</span>
+        </div>
+        <div class="opinion-item" data-opinion="beautiful">
+          <div class="tickbox"></div>
+          <span class="opinion-emoji">😍</span>
+          <span class="opinion-text">They're beautiful.</span>
+        </div>
+        <div class="opinion-item" data-opinion="bad">
+          <div class="tickbox"></div>
+          <span class="opinion-emoji">😠</span>
+          <span class="opinion-text">They're bad.</span>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="finishCard" style="display:none; text-align:center; background:linear-gradient(160deg,#fff,#fff3d6);">
+      <div style="font-size:58px; animation: gentle-float 2s ease-in-out infinite;">🏆🐺🏆</div>
+      <p style="font-size:20px; font-weight:800; color:var(--forest-deep); margin:6px 0 0;">Great job! You are a Wolf Expert!</p>
+    </div>
+  </section>
+
+  <div class="bottom-nav">
+    <button id="prevBtn">⬅ Back</button>
+    <button id="nextBtn">Next ➡</button>
+  </div>
+  <p class="sr-caption">Tap words and sentences to hear them read aloud 🔊</p>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- DATA ----------
+  var numbers = [
+    {n:20, w:"twenty"}, {n:30, w:"thirty"}, {n:40, w:"forty"},
+    {n:50, w:"fifty"}, {n:60, w:"sixty"}, {n:70, w:"seventy"},
+    {n:80, w:"eighty"}, {n:90, w:"ninety"}, {n:100, w:"a hundred"}
+  ];
+
+  var storySentences = [
+    "Wolves can be grey, black, white or brown.",
+    "There are wolves in sixty countries.",
+    "There are wolves in Russia, Canada, India and China.",
+    "There aren't any wolves in Australia.",
+    "Wolves are big.",
+    "Lots of wolves are a hundred centimetres (cm) long.",
+    "They've got a long tail.",
+    "Some are fifty cm long.",
+    "They've got forty-two teeth.",
+    "A wolf can run at sixty-five kilometres per hour (kph)!"
+  ];
+
+  var facts = [
+    {label:"Colours:", parts:["grey, ", {blank:true, answer:"black", id:"f1"}, ", ", {blank:true, answer:"white", id:"f2"}, ", ", {blank:true, answer:"brown", id:"f3"}]},
+    {label:"Countries with wolves:", parts:["60"]},
+    {label:"Body:", parts:[{blank:true, answer:"100", id:"f4"}, " cm long"]},
+    {label:"Tail:", parts:[{blank:true, answer:"50", id:"f5"}, " cm long"]},
+    {label:"Teeth:", parts:[{blank:true, answer:"42", id:"f6"}]},
+    {label:"Can run at:", parts:[{blank:true, answer:"65", id:"f7"}, " kph"]},
+    {label:"Number in a pack:", parts:[{blank:true, answer:"4-9", id:"f8", alt:["4-9","4to9","4 to 9","four to nine"]}]},
+    {label:"Food:", parts:["birds, ", {blank:true, answer:"fish", id:"f9"}]}
+  ];
+
+  var panels = ["vocab","activity1","activity2","activity3","activity4"];
+  var starsEarned = {vocab:false, activity1:false, activity2:false, activity3:false, activity4:false};
+
+  // ---------- SPEECH ----------
+  var canSpeak = ("speechSynthesis" in window);
+  var voices = [];
+  function loadVoices(){ voices = canSpeak ? window.speechSynthesis.getVoices() : []; }
+  if(canSpeak){
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+  function pickVoice(){
+    if(!voices || !voices.length) return null;
+    var pref = voices.find(function(v){ return /en-GB|en_GB/.test(v.lang) && /female/i.test(v.name); });
+    if(pref) return pref;
+    pref = voices.find(function(v){ return /^en/i.test(v.lang); });
+    return pref || voices[0];
+  }
+  function speak(text, onEnd){
+    if(!canSpeak){ if(onEnd) onEnd(); return; }
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    var v = pickVoice();
+    if(v) u.voice = v;
+    u.rate = 0.85;
+    u.pitch = 1.05;
+    if(onEnd) u.onend = onEnd;
+    window.speechSynthesis.speak(u);
+  }
+  function speakQueue(list, i, onDone){
+    i = i || 0;
+    if(i >= list.length){ if(onDone) onDone(); return; }
+    var item = list[i];
+    if(item.before) item.before();
+    speak(item.text, function(){
+      if(item.after) item.after();
+      speakQueue(list, i+1, onDone);
+    });
+  }
+
+  // ---------- BUILD VOCAB BANNER ----------
+  var vocabBanner = document.getElementById("vocabBanner");
+  numbers.forEach(function(item){
+    var tile = document.createElement("button");
+    tile.className = "vocab-tile";
+    tile.innerHTML =
+      '<div class="num">' + item.n + '</div>' +
+      '<div class="word"></div>' +
+      '<div class="speak-hint">🔊 tap me</div>';
+    tile.addEventListener("click", function(){
+      var wordEl = tile.querySelector(".word");
+      wordEl.textContent = item.w;
+      tile.classList.add("revealed", "speaking");
+      speak(item.w, function(){ tile.classList.remove("speaking"); });
+      maybeAwardStar("vocab");
+    });
+    vocabBanner.appendChild(tile);
+  });
+
+  document.getElementById("listenAllNumbers").addEventListener("click", function(){
+    var tiles = vocabBanner.querySelectorAll(".vocab-tile");
+    var queue = numbers.map(function(item, idx){
+      return {
+        text: item.w,
+        before: function(){
+          tiles.forEach(function(t){ t.classList.remove("speaking"); });
+          tiles[idx].classList.add("revealed","speaking");
+          tiles[idx].querySelector(".word").textContent = item.w;
+        },
+        after: function(){ tiles[idx].classList.remove("speaking"); }
+      };
+    });
+    speakQueue(queue, 0, function(){ maybeAwardStar("vocab"); });
+  });
+
+  // ---------- BUILD STORY TEXT ----------
+  var storyText = document.getElementById("storyText");
+  storySentences.forEach(function(sentence, idx){
+    var span = document.createElement("span");
+    span.className = "sentence";
+    span.dataset.idx = idx;
+    span.textContent = sentence + " ";
+    span.addEventListener("click", function(){
+      document.querySelectorAll(".story-text .sentence").forEach(function(s){ s.classList.remove("speaking"); });
+      span.classList.add("speaking");
+      speak(sentence, function(){ span.classList.remove("speaking"); });
+    });
+    storyText.appendChild(span);
+  });
+
+  document.getElementById("listenStory").addEventListener("click", function(){
+    var spans = storyText.querySelectorAll(".sentence");
+    var queue = storySentences.map(function(sentence, idx){
+      return {
+        text: sentence,
+        before: function(){
+          spans.forEach(function(s){ s.classList.remove("speaking"); });
+          spans[idx].classList.add("speaking");
+        },
+        after: function(){ spans[idx].classList.remove("speaking"); }
+      };
+    });
+    speakQueue(queue, 0, function(){ maybeAwardStar("activity1"); });
+  });
+
+  document.getElementById("cubPhoto").querySelector("p").addEventListener("click", function(e){
+    speak(e.target.textContent);
+  });
+  document.getElementById("packPhoto").querySelector("p").addEventListener("click", function(e){
+    speak(e.target.textContent);
+  });
+
+  document.querySelectorAll("#predictBox input[type=checkbox]").forEach(function(box){
+    box.addEventListener("change", function(){ maybeAwardStar("activity1"); });
+  });
+
+  // ---------- BUILD FACTS (Activity 2) ----------
+  var factsGrid = document.getElementById("factsGrid");
+  facts.forEach(function(fact){
+    var row = document.createElement("div");
+    row.className = "fact-row";
+    var label = document.createElement("span");
+    label.className = "fact-label";
+    label.textContent = fact.label;
+    row.appendChild(label);
+
+    fact.parts.forEach(function(part){
+      if(typeof part === "string"){
+        var s = document.createElement("span");
+        s.className = "fact-static";
+        s.textContent = part;
+        row.appendChild(s);
+      } else {
+        var input = document.createElement("input");
+        input.type = "text";
+        input.className = "fact-blank";
+        input.id = part.id;
+        input.setAttribute("inputmode","text");
+        input.autocomplete = "off";
+        input.dataset.answer = part.answer;
+        if(part.alt) input.dataset.alt = JSON.stringify(part.alt);
+        row.appendChild(input);
+      }
+    });
+    factsGrid.appendChild(row);
+  });
+
+  function normalize(str){
+    return (str || "").toString().trim().toLowerCase().replace(/\s+/g," ");
+  }
+
+  document.getElementById("checkFacts").addEventListener("click", function(){
+    var inputs = factsGrid.querySelectorAll(".fact-blank");
+    var correctCount = 0;
+    inputs.forEach(function(input){
+      var val = normalize(input.value);
+      var answer = normalize(input.dataset.answer);
+      var altList = input.dataset.alt ? JSON.parse(input.dataset.alt).map(normalize) : [];
+      var isCorrect = (val === answer) || altList.indexOf(val) !== -1;
+      if(isCorrect){
+        input.classList.add("correct");
+        correctCount++;
+      } else {
+        input.classList.remove("correct");
+      }
+    });
+    var feedback = document.getElementById("facts-feedback");
+    if(correctCount === inputs.length){
+      feedback.textContent = "🌟 Wonderful! All " + inputs.length + " correct! You're a star!";
+      feedback.style.color = "var(--success)";
+      maybeAwardStar("activity2");
+    } else {
+      feedback.textContent = "You got " + correctCount + " of " + inputs.length + ". Look at the story again and try more!";
+      feedback.style.color = "var(--berry)";
+    }
+  });
+
+  document.getElementById("resetFacts").addEventListener("click", function(){
+    factsGrid.querySelectorAll(".fact-blank").forEach(function(input){
+      input.value = "";
+      input.classList.remove("correct");
+    });
+    document.getElementById("facts-feedback").textContent = "";
+  });
+
+  // ---------- ACTIVITY 3 CHIPS ----------
+  document.querySelectorAll("#promptChips .chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      speak(chip.textContent);
+      maybeAwardStar("activity3");
+    });
+  });
+
+  // ---------- ACTIVITY 4 OPINIONS ----------
+  document.querySelectorAll("#opinionList .opinion-item").forEach(function(item){
+    item.addEventListener("click", function(){
+      document.querySelectorAll("#opinionList .opinion-item").forEach(function(i){
+        i.classList.remove("checked");
+        i.querySelector(".tickbox").textContent = "";
+      });
+      item.classList.add("checked");
+      item.querySelector(".tickbox").textContent = "✓";
+      speak(item.querySelector(".opinion-text").textContent);
+      maybeAwardStar("activity4");
+      document.getElementById("finishCard").style.display = "block";
+    });
+  });
+
+  // ---------- NAVIGATION ----------
+  var navButtons = document.querySelectorAll(".nav-btn");
+  var panelEls = {};
+  panels.forEach(function(p){ panelEls[p] = document.getElementById("panel-" + p); });
+
+  function showPanel(name){
+    panels.forEach(function(p){
+      panelEls[p].classList.toggle("active", p === name);
+    });
+    navButtons.forEach(function(btn){
+      btn.classList.toggle("active", btn.dataset.panel === name);
+    });
+    var appEl = document.getElementById("app");
+    if(appEl) appEl.scrollTo({top:0, behavior:"smooth"});
+    updateBottomNav(name);
+  }
+
+  navButtons.forEach(function(btn){
+    btn.addEventListener("click", function(){ showPanel(btn.dataset.panel); });
+  });
+
+  var prevBtn = document.getElementById("prevBtn");
+  var nextBtn = document.getElementById("nextBtn");
+
+  function currentPanelIndex(){
+    for(var i=0;i<panels.length;i++){
+      if(panelEls[panels[i]].classList.contains("active")) return i;
+    }
+    return 0;
+  }
+
+  function updateBottomNav(name){
+    var idx = panels.indexOf(name);
+    prevBtn.disabled = (idx === 0);
+    nextBtn.disabled = (idx === panels.length - 1);
+    nextBtn.textContent = (idx === panels.length - 1) ? "Finished! 🏆" : "Next ➡";
+  }
+
+  prevBtn.addEventListener("click", function(){
+    var idx = currentPanelIndex();
+    if(idx > 0) showPanel(panels[idx-1]);
+  });
+  nextBtn.addEventListener("click", function(){
+    var idx = currentPanelIndex();
+    if(idx < panels.length - 1) showPanel(panels[idx+1]);
+  });
+
+  updateBottomNav("vocab");
+
+  function maybeAwardStar(panelName){
+    if(starsEarned[panelName]) return;
+    starsEarned[panelName] = true;
+    var navBtn = document.querySelector('.nav-btn[data-panel="' + panelName + '"]');
+    if(navBtn && !navBtn.querySelector(".star-check")){
+      var check = document.createElement("span");
+      check.className = "star-check";
+      check.textContent = "✓";
+      navBtn.appendChild(check);
+    }
+  }
+
+})();
+</script>
+
+</body>
+</html>
